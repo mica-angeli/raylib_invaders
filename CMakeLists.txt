@@ -5,7 +5,7 @@ if(CCACHE_PROGRAM)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
 endif()
 
-project(raylib_template C)
+project(raylib_invaders C)
 
 set(CMAKE_C_STANDARD 11)
 
@@ -16,8 +16,8 @@ target_link_libraries(${PROJECT_NAME} raylib)
 
 if(APPLE)
     # Create app bundle
-    set(MACOSX_BUNDLE_NAME "raylib_template")
-    set(MACOSX_BUNDLE_PACKAGE_NAME "rangeli.raylib_template")
+    set(MACOSX_BUNDLE_NAME "Raylib Invaders")
+    set(MACOSX_BUNDLE_PACKAGE_NAME "rangeli.raylib_invaders")
 
     set_target_properties(${PROJECT_NAME} PROPERTIES
         OUTPUT_NAME ${MACOSX_BUNDLE_NAME}
