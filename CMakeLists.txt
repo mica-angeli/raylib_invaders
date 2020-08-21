@@ -11,7 +11,11 @@ set(CMAKE_C_STANDARD 11)
 
 add_subdirectory(libs/raylib)
 
-add_executable(${PROJECT_NAME} src/main.c)
+include_directories(include)
+
+file(GLOB_RECURSE SOURCES "src/*.c")
+
+add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} raylib)
 
 if(APPLE)
