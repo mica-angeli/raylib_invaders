@@ -2,19 +2,23 @@
 #include "game.h"
 
 int main() {
-  const int screen_width = 800;
-  const int screen_height = 450;
+  Game g = {
+      .screenWidth=800,
+      .screenHeight=450
+  };
 
-  InitWindow(screen_width, screen_height, "Raylib Invaders");
+  InitWindow(g.screenWidth, g.screenHeight, "Raylib Invaders");
 
-  InitGame();
+  InitGame(&g);
 
   SetTargetFPS(60);
 
   while(!WindowShouldClose())
   {
-    UpdateGame();
-    DrawGame();
+    UpdateGame(&g);
+    BeginDrawing();
+    DrawGame(&g);
+    EndDrawing();
   }
 
   CloseWindow();
