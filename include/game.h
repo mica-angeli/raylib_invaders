@@ -2,7 +2,6 @@
 #define RAYLIB_INVADERS_GAME_H
 
 #include <raylib.h>
-#include "vector.h"
 
 #define MAX_BULLETS 16
 

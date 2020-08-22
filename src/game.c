@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include "game.h"
 
 #define foreach(item, array) \
@@ -11,6 +10,8 @@
       for(item = (array) + count; keep; keep = !keep)
 
 static Vector2 RectangleCenter(const Rectangle* rect);
+static bool CheckCollisionRectPoint(const Rectangle* r, const Vector2* p);
+static bool CheckCollisionRectRect(const Rectangle* r1, const Rectangle* r2);
 
 void InitGame(Game* g)
 {
@@ -38,7 +39,7 @@ void InitGame(Game* g)
     bullet->color = MAROON;
   }
 
-  printf("Game object size %d bytes\n", sizeof(Game));
+  printf("Game object size %lu bytes\n", sizeof(Game));
 }
 
 void UpdateGame(Game* g)
@@ -90,7 +91,8 @@ void UpdateGame(Game* g)
       bullet->rect.x += bullet->speed.x;
       bullet->rect.y += bullet->speed.y;
 
-      if(bullet->rect.y <= 0)
+      // Check if bullet has left the screen
+      if(!CheckCollisionRectRect(&bullet->rect, &g->screen))
       {
         bullet->active = false;
         g->shootRate = 0;
@@ -126,4 +128,45 @@ static Vector2 RectangleCenter(const Rectangle* rect)
       .y = rect->y + rect->height / 2.0f
   };
   return center;
+}
+
+static bool CheckCollisionRectPoint(const Rectangle* r, const Vector2* p)
+{
+  return p->x >= r->x && p->x <= r->x + r->width &&
+    p->y >= r->y && p->y <= r->y + r->height;
+}
+
+static bool CheckCollisionRectRect(const Rectangle* r1, const Rectangle* r2)
+{
+  // Array of corners in r2
+  const Vector2 r2_corners[] = {
+    {r2->x, r2->y},
+    {r2->x + r2->width, r2->y},
+    {r2->x, r2->y + r2->height},
+    {r2->x + r2->width, r2->y + r2->height}
+  };
+
+  // Check if any corner of r2 is within r1
+  foreach(const Vector2* p, r2_corners)
+  {
+    if(CheckCollisionRectPoint(r1, p))
+      return true;
+  }
+
+  // Array of corners in r1
+  const Vector2 r1_corners[] = {
+      {r1->x, r1->y},
+      {r1->x + r1->width, r1->y},
+      {r1->x, r1->y + r1->height},
+      {r1->x + r1->width, r1->y + r1->height}
+  };
+
+  // Check if any corner of r1 is within r2
+  foreach(const Vector2* p, r1_corners)
+  {
+    if(CheckCollisionRectPoint(r2, p))
+      return true;
+  }
+
+  return false;
 }
