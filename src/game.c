@@ -10,8 +10,6 @@
       for(item = (array) + count; keep; keep = !keep)
 
 static Vector2 RectangleCenter(const Rectangle* rect);
-static bool CheckCollisionRectPoint(const Rectangle* r, const Vector2* p);
-static bool CheckCollisionRectRect(const Rectangle* r1, const Rectangle* r2);
 
 void InitGame(Game* g)
 {
@@ -39,7 +37,24 @@ void InitGame(Game* g)
     bullet->color = MAROON;
   }
 
-  printf("Game object size %lu bytes\n", sizeof(Game));
+  g->activeEnemies = 20;
+
+  // Initialize enemies
+  foreach(Entity* enemy, g->enemies)
+  {
+    enemy->rect.width = 20;
+    enemy->rect.height = 20;
+    enemy->rect.x = (float) GetRandomValue(0, (int) g->screen.width);
+    enemy->rect.y = (float) GetRandomValue((int) -g->screen.height, -20);
+    enemy->max_speed.x = 0;
+    enemy->max_speed.y = 5.0f + 0.1f * (float) GetRandomValue(-10, 10);
+    enemy->speed.x = 0;
+    enemy->speed.y = 0;
+    enemy->active = true;
+    enemy->color = BLUE;
+  }
+
+  TraceLog(LOG_INFO, "Game object size %lu bytes\n", sizeof(Game));
 }
 
 void UpdateGame(Game* g)
@@ -74,6 +89,7 @@ void UpdateGame(Game* g)
 
         bullet->rect.x = player_center.x - bullet->rect.width / 2;
         bullet->rect.y = g->player.rect.y;
+        bullet->speed.x = g->player.speed.x / 4;
         bullet->speed.y = -10;
         bullet->active = true;
         break;
@@ -90,11 +106,53 @@ void UpdateGame(Game* g)
       bullet->rect.y += bullet->speed.y;
 
       // Check if bullet has left the screen
-      if(!CheckCollisionRectRect(&bullet->rect, &g->screen))
+      if(!CheckCollisionRecs(bullet->rect, g->screen))
       {
         bullet->active = false;
         g->shootRate = 0;
       }
+
+      // Check if bullet has collided with an enemy
+      for(int i = 0; i < g->activeEnemies; i++)
+      {
+        Entity *enemy = &g->enemies[i];
+        if(enemy->active)
+        {
+          if(CheckCollisionRecs(bullet->rect, enemy->rect))
+          {
+            bullet->active = false;
+
+            // Reset enemy position
+            enemy->rect.x = (float) GetRandomValue(g->screen.width, g->screen.width + 1000);
+            enemy->rect.y = (float) GetRandomValue(0, g->screen.height - enemy->rect.height);
+            g->shootRate = 0;
+          }
+        }
+      }
+    }
+  }
+
+  for(int i = 0; i < g->activeEnemies; i++)
+  {
+    Entity* enemy = &g->enemies[i];
+    if(enemy->active)
+    {
+      enemy->speed.x = enemy->max_speed.x;
+      enemy->speed.y = enemy->max_speed.y;
+
+      enemy->rect.x += enemy->speed.x;
+      enemy->rect.y += enemy->speed.y;
+
+      if(!CheckCollisionRecs(enemy->rect, g->screen))
+      {
+        enemy->rect.x = (float) GetRandomValue(0, (int) g->screen.width);
+        enemy->rect.y = (float) GetRandomValue((int) -g->screen.height, -20);
+      }
+    }
+    else
+    {
+      enemy->speed.x = 0;
+      enemy->speed.y = 0;
     }
   }
 }
@@ -112,6 +170,16 @@ void DrawGame(Game* g)
       DrawRectangleRec(bullet->rect, bullet->color);
     }
   }
+
+  for(int i = 0; i < g->activeEnemies; i++)
+  {
+    Entity *enemy = &g->enemies[i];
+    if(enemy->active)
+    {
+      DrawRectangleRec(enemy->rect, enemy->color);
+    }
+  }
+
 }
 
 void CloseGame(Game* g)
@@ -126,45 +194,4 @@ static Vector2 RectangleCenter(const Rectangle* rect)
       .y = rect->y + rect->height / 2.0f
   };
   return center;
-}
-
-static bool CheckCollisionRectPoint(const Rectangle* r, const Vector2* p)
-{
-  return p->x >= r->x && p->x <= r->x + r->width &&
-    p->y >= r->y && p->y <= r->y + r->height;
-}
-
-static bool CheckCollisionRectRect(const Rectangle* r1, const Rectangle* r2)
-{
-  // Array of corners in r2
-  const Vector2 r2_corners[] = {
-    {r2->x, r2->y},
-    {r2->x + r2->width, r2->y},
-    {r2->x, r2->y + r2->height},
-    {r2->x + r2->width, r2->y + r2->height}
-  };
-
-  // Check if any corner of r2 is within r1
-  foreach(const Vector2* p, r2_corners)
-  {
-    if(CheckCollisionRectPoint(r1, p))
-      return true;
-  }
-
-  // Array of corners in r1
-  const Vector2 r1_corners[] = {
-      {r1->x, r1->y},
-      {r1->x + r1->width, r1->y},
-      {r1->x, r1->y + r1->height},
-      {r1->x + r1->width, r1->y + r1->height}
-  };
-
-  // Check if any corner of r1 is within r2
-  foreach(const Vector2* p, r1_corners)
-  {
-    if(CheckCollisionRectPoint(r2, p))
-      return true;
-  }
-
-  return false;
 }
