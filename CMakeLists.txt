@@ -14,8 +14,9 @@ add_subdirectory(libs/raylib)
 include_directories(include)
 
 file(GLOB_RECURSE SOURCES "src/*.c")
+file(GLOB_RECURSE RESOURCE_FILES "resources/*")
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES} ${RESOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} raylib)
 
 if(APPLE)
@@ -24,7 +25,6 @@ if(APPLE)
     set(MACOSX_BUNDLE_PACKAGE_NAME "rangeli.raylib_invaders")
 
     set_target_properties(${PROJECT_NAME} PROPERTIES
-        OUTPUT_NAME ${MACOSX_BUNDLE_NAME}
         MACOSX_BUNDLE ON
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/MacOSXBundleInfo.plist.in)
 endif()

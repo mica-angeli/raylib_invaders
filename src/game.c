@@ -61,9 +61,9 @@ void InitGame(Game* g, double now)
     enemy->color = BLUE;
   }
 
-  g->sfxShoot = LoadSound("resources/shoot.wav");
-  g->sfxEnemyExplode = LoadSound("resources/enemy_explode.wav");
-  g->sfxPlayerExplode = LoadSound("resources/player_explode.wav");
+  g->sfxShoot = LoadSound("../Resources/shoot.wav");
+  g->sfxEnemyExplode = LoadSound("../Resources/enemy_explosion.wav");
+  g->sfxPlayerExplode = LoadSound("../Resources/player_explosion.wav");
 
   TraceLog(LOG_INFO, "Game object size %lu bytes\n", sizeof(Game));
 }
@@ -169,7 +169,7 @@ void UpdateGame(Game* g, double now, float dt)
       }
 
       // Check if enemy collides with player
-      if(CheckCollisionRecs(enemy->rect, g->player.rect))
+      if(g->player.active && CheckCollisionRecs(enemy->rect, g->player.rect))
       {
         PlaySound(g->sfxPlayerExplode);
 
