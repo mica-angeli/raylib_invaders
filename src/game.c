@@ -27,7 +27,7 @@ void InitGame(Game* g)
   g->shootRate = 0;
 
   // Initialize bullets
-  foreach(Bullet* bullet, g->bullets)
+  foreach(Entity* bullet, g->bullets)
   {
     bullet->rect.x = 0;
     bullet->rect.y = 0;
@@ -66,7 +66,7 @@ void UpdateGame(Game* g)
   {
     g->shootRate += 5;
 
-    foreach(Bullet* bullet, g->bullets)
+    foreach(Entity* bullet, g->bullets)
     {
       if(!bullet->active && g->shootRate % 40 == 0)
       {
@@ -82,7 +82,7 @@ void UpdateGame(Game* g)
   }
 
   // Update bullet positions
-  foreach(Bullet* bullet, g->bullets)
+  foreach(Entity* bullet, g->bullets)
   {
     if(bullet->active)
     {
@@ -105,7 +105,7 @@ void DrawGame(Game* g)
 
   DrawRectangleRec(g->player.rect, g->player.color);
 
-  foreach(Bullet* bullet, g->bullets)
+  foreach(Entity* bullet, g->bullets)
   {
     if(bullet->active)
     {

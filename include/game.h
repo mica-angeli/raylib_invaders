@@ -5,27 +5,20 @@
 
 #define MAX_BULLETS 16
 
-typedef struct Player
-{
-  Rectangle rect;
-  Vector2 speed;
-  Color color;
-} Player;
-
-typedef struct Bullet
+typedef struct Entity
 {
   Rectangle rect;
   Vector2 speed;
   bool active;
   Color color;
-} Bullet;
+} Entity;
 
 typedef struct Game
 {
   const Rectangle screen;
   int shootRate;
-  Player player;
-  Bullet bullets[MAX_BULLETS];
+  Entity player;
+  Entity bullets[MAX_BULLETS];
 } Game;
 
 void InitGame(Game* g);
