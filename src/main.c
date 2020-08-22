@@ -22,5 +22,6 @@ int main() {
   }
 
   CloseWindow();
+  CloseGame(&g);
   return 0;
 }

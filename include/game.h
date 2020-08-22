@@ -2,6 +2,7 @@
 #define RAYLIB_INVADERS_GAME_H
 
 #include <raylib.h>
+#include "vector.h"
 
 typedef struct Player
 {
@@ -10,15 +11,26 @@ typedef struct Player
   Color color;
 } Player;
 
+typedef struct Bullet
+{
+  Rectangle rect;
+  Vector2 speed;
+  bool active;
+  Color color;
+} Bullet;
+
 typedef struct Game
 {
   const int screenWidth;
   const int screenHeight;
+  int shootRate;
   Player player;
+  vector bullets;
 } Game;
 
 void InitGame(Game* g);
 void UpdateGame(Game* g);
 void DrawGame(Game* g);
+void CloseGame(Game* g);
 
 #endif //RAYLIB_INVADERS_GAME_H
