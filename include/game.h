@@ -4,7 +4,7 @@
 #include <raylib.h>
 
 #define MAX_BULLETS 16
-#define MAX_ENEMIES 50
+#define MAX_ENEMIES 32
 
 typedef struct Entity
 {
@@ -21,6 +21,7 @@ typedef struct Game
   float timeUntilNextShot;
   float shootRate;
   int activeEnemies;
+  int score;
   Entity player;
   Entity bullets[MAX_BULLETS];
   Entity enemies[MAX_ENEMIES];

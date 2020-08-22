@@ -61,6 +61,8 @@ void InitGame(Game* g)
     enemy->color = BLUE;
   }
 
+  g->score = 0;
+
   g->sfxShoot = LoadSound("../Resources/shoot.wav");
   g->sfxEnemyExplode = LoadSound("../Resources/enemy_explosion.wav");
   g->sfxPlayerExplode = LoadSound("../Resources/player_explosion.wav");
@@ -145,6 +147,9 @@ void UpdateGame(Game* g, float dt)
             enemy->rect.x = (float) GetRandomValue(g->screen.width, g->screen.width + 1000);
             enemy->rect.y = (float) GetRandomValue(0, g->screen.height - enemy->rect.height);
             g->timeUntilNextShot = 0;
+
+            // Increase score
+            g->score += 100;
           }
         }
       }
@@ -214,6 +219,9 @@ void DrawGame(Game* g)
     DrawRectangleRec(g->player.rect, g->player.color);
   }
 
+  char scoreString[16];
+  snprintf(scoreString, 16, "%08d", g->score);
+  DrawText(scoreString, 10, 10, 30, LIGHTGRAY);
 }
 
 void CloseGame(Game* g)
