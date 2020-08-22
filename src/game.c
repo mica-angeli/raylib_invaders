@@ -14,13 +14,17 @@ static Vector2 RectangleCenter(const Rectangle* rect);
 void InitGame(Game* g, double now)
 {
   // Initialize player
-  g->player.rect.x = g->screen.width / 2.0f;
-  g->player.rect.y = g->screen.height - 20;
-  g->player.rect.width = 20;
-  g->player.rect.height = 20;
-  g->player.speed.x = 0;
-  g->player.speed.y = 0;
-  g->player.color = BLACK;
+  Entity* player = &g->player;
+  player->rect.x = g->screen.width / 2.0f;
+  player->rect.y = g->screen.height - 20;
+  player->rect.width = 20;
+  player->rect.height = 20;
+  player->max_speed.x = 300;
+  player->max_speed.y = 0;
+  player->speed.x = 0;
+  player->speed.y = 0;
+  player->active = true;
+  player->color = BLACK;
 
   g->lastShot = 0;
   g->shootRate = 3;
@@ -32,6 +36,8 @@ void InitGame(Game* g, double now)
     bullet->rect.y = 0;
     bullet->rect.width = 5;
     bullet->rect.height = 10;
+    bullet->max_speed.x = 0;
+    bullet->max_speed.y = 600;
     bullet->speed.x = 0;
     bullet->speed.y = 0;
     bullet->active = false;
@@ -48,7 +54,7 @@ void InitGame(Game* g, double now)
     enemy->rect.x = (float) GetRandomValue(0, (int) g->screen.width);
     enemy->rect.y = (float) GetRandomValue((int) -g->screen.height, -20);
     enemy->max_speed.x = 0;
-    enemy->max_speed.y = 300.0f + 6.0f * (float) GetRandomValue(-10, 10);
+    enemy->max_speed.y = 200.0f + 6.0f * (float) GetRandomValue(-10, 10);
     enemy->speed.x = 0;
     enemy->speed.y = 0;
     enemy->active = true;
@@ -61,7 +67,11 @@ void InitGame(Game* g, double now)
 void UpdateGame(Game* g, double now, float dt)
 {
   // Update player speed
-  g->player.speed.x = 300.0f * (float) (IsKeyDown(KEY_RIGHT) - IsKeyDown(KEY_LEFT));
+  g->player.speed.x = g->player.max_speed.x *
+                      (float) (IsKeyDown(KEY_RIGHT) - IsKeyDown(KEY_LEFT)) *
+                      g->player.active;
+  g->player.speed.y = g->player.max_speed.y * g->player.active;
+
 
   // Update player position
   g->player.rect.x += g->player.speed.x * dt;
@@ -77,8 +87,10 @@ void UpdateGame(Game* g, double now, float dt)
     g->player.rect.x = g->screen.width - g->player.rect.width;
   }
 
-  // Fire bullets
-  if(IsKeyDown(KEY_SPACE) && (now - g->lastShot) > 1.0f / g->shootRate)
+  // Fire bullets when space bar is pressed at a certain rate and player is still alive
+  if(IsKeyDown(KEY_SPACE) &&
+    (now - g->lastShot) > 1.0f / g->shootRate &&
+    g->player.active)
   {
     g->lastShot = now;
 
@@ -90,8 +102,8 @@ void UpdateGame(Game* g, double now, float dt)
 
         bullet->rect.x = player_center.x - bullet->rect.width / 2;
         bullet->rect.y = g->player.rect.y;
-        bullet->speed.x = g->player.speed.x / 4;
-        bullet->speed.y = -600;
+        bullet->speed.x = bullet->max_speed.x + g->player.speed.x / 4;
+        bullet->speed.y = -bullet->max_speed.y;
         bullet->active = true;
         break;
       }
@@ -143,10 +155,20 @@ void UpdateGame(Game* g, double now, float dt)
       enemy->rect.x += enemy->speed.x * dt;
       enemy->rect.y += enemy->speed.y * dt;
 
+      // Check if enemy goes off screen
       if(!CheckCollisionRecs(enemy->rect, g->screen))
       {
         enemy->rect.x = (float) GetRandomValue(0, (int) g->screen.width);
         enemy->rect.y = (float) GetRandomValue((int) -g->screen.height, -20);
+      }
+
+      // Check if enemy collides with player
+      if(CheckCollisionRecs(enemy->rect, g->player.rect))
+      {
+        enemy->rect.x = (float) GetRandomValue(0, (int) g->screen.width);
+        enemy->rect.y = (float) GetRandomValue((int) -g->screen.height, -20);
+
+        g->player.active = false;
       }
     }
     else
@@ -160,8 +182,6 @@ void UpdateGame(Game* g, double now, float dt)
 void DrawGame(Game* g)
 {
   ClearBackground(RAYWHITE);
-
-  DrawRectangleRec(g->player.rect, g->player.color);
 
   foreach(Entity* bullet, g->bullets)
   {
@@ -178,6 +198,11 @@ void DrawGame(Game* g)
     {
       DrawRectangleRec(enemy->rect, enemy->color);
     }
+  }
+
+  if(g->player.active)
+  {
+    DrawRectangleRec(g->player.rect, g->player.color);
   }
 
 }
