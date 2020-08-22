@@ -20,8 +20,8 @@ void InitGame(Game* g)
   g->player.rect.y = g->screen.height - 20;
   g->player.rect.width = 20;
   g->player.rect.height = 20;
-  g->player.speed.x = 5;
-  g->player.speed.y = 5;
+  g->player.speed.x = 0;
+  g->player.speed.y = 0;
   g->player.color = BLACK;
 
   g->shootRate = 0;
@@ -34,7 +34,7 @@ void InitGame(Game* g)
     bullet->rect.width = 5;
     bullet->rect.height = 10;
     bullet->speed.x = 0;
-    bullet->speed.y = -10;
+    bullet->speed.y = 0;
     bullet->active = false;
     bullet->color = MAROON;
   }
@@ -44,15 +44,12 @@ void InitGame(Game* g)
 
 void UpdateGame(Game* g)
 {
-  // Player movement
-  if(IsKeyDown(KEY_RIGHT))
-  {
-    g->player.rect.x += g->player.speed.x;
-  }
-  if(IsKeyDown(KEY_LEFT))
-  {
-    g->player.rect.x -= g->player.speed.x;
-  }
+  // Update player speed
+  g->player.speed.x = 5 * (IsKeyDown(KEY_RIGHT) - IsKeyDown(KEY_LEFT));
+
+  // Update player position
+  g->player.rect.x += g->player.speed.x;
+  g->player.rect.y += g->player.speed.y;
 
   // Wall behavior
   if(g->player.rect.x <= 0)
@@ -64,6 +61,7 @@ void UpdateGame(Game* g)
     g->player.rect.x = g->screen.width - g->player.rect.width;
   }
 
+  // Fire bullets
   if(IsKeyDown(KEY_SPACE))
   {
     g->shootRate += 5;
@@ -73,17 +71,17 @@ void UpdateGame(Game* g)
       if(!bullet->active && g->shootRate % 40 == 0)
       {
         const Vector2 player_center = RectangleCenter(&g->player.rect);
-        const float buffer = 10;
 
         bullet->rect.x = player_center.x - bullet->rect.width / 2;
-        bullet->rect.y = player_center.y - buffer - bullet->rect.height;
+        bullet->rect.y = g->player.rect.y;
+        bullet->speed.y = -10;
         bullet->active = true;
         break;
       }
     }
   }
 
-  // Update Bullet positions
+  // Update bullet positions
   foreach(Bullet* bullet, g->bullets)
   {
     if(bullet->active)
