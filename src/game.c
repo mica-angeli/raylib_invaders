@@ -61,6 +61,10 @@ void InitGame(Game* g, double now)
     enemy->color = BLUE;
   }
 
+  g->sfxShoot = LoadSound("resources/shoot.wav");
+  g->sfxEnemyExplode = LoadSound("resources/enemy_explode.wav");
+  g->sfxPlayerExplode = LoadSound("resources/player_explode.wav");
+
   TraceLog(LOG_INFO, "Game object size %lu bytes\n", sizeof(Game));
 }
 
@@ -93,6 +97,7 @@ void UpdateGame(Game* g, double now, float dt)
     g->player.active)
   {
     g->lastShot = now;
+    PlaySound(g->sfxShoot);
 
     foreach(Entity* bullet, g->bullets)
     {
@@ -133,6 +138,7 @@ void UpdateGame(Game* g, double now, float dt)
           if(CheckCollisionRecs(bullet->rect, enemy->rect))
           {
             bullet->active = false;
+            PlaySound(g->sfxEnemyExplode);
 
             // Reset enemy position
             enemy->rect.x = (float) GetRandomValue(g->screen.width, g->screen.width + 1000);
@@ -165,6 +171,8 @@ void UpdateGame(Game* g, double now, float dt)
       // Check if enemy collides with player
       if(CheckCollisionRecs(enemy->rect, g->player.rect))
       {
+        PlaySound(g->sfxPlayerExplode);
+
         enemy->rect.x = (float) GetRandomValue(0, (int) g->screen.width);
         enemy->rect.y = (float) GetRandomValue((int) -g->screen.height, -20);
 
@@ -209,7 +217,9 @@ void DrawGame(Game* g)
 
 void CloseGame(Game* g)
 {
-
+  UnloadSound(g->sfxShoot);
+  UnloadSound(g->sfxEnemyExplode);
+  UnloadSound(g->sfxPlayerExplode);
 }
 
 static Vector2 RectangleCenter(const Rectangle* rect)

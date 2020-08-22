@@ -13,6 +13,8 @@ int main() {
 
   InitWindow(g.screen.width, g.screen.height, "Raylib Invaders");
 
+  InitAudioDevice();
+
   InitGame(&g, GetTime());
 
 //  SetTargetFPS(60);

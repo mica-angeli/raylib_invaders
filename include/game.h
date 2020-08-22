@@ -24,6 +24,9 @@ typedef struct Game
   Entity player;
   Entity bullets[MAX_BULLETS];
   Entity enemies[MAX_ENEMIES];
+  Sound sfxShoot;
+  Sound sfxEnemyExplode;
+  Sound sfxPlayerExplode;
 } Game;
 
 void InitGame(Game* g, double now);
