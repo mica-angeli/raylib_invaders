@@ -18,15 +18,16 @@ typedef struct Entity
 typedef struct Game
 {
   const Rectangle screen;
-  int shootRate;
+  double lastShot;
+  float shootRate;
   int activeEnemies;
   Entity player;
   Entity bullets[MAX_BULLETS];
   Entity enemies[MAX_ENEMIES];
 } Game;
 
-void InitGame(Game* g);
-void UpdateGame(Game* g);
+void InitGame(Game* g, double now);
+void UpdateGame(Game* g, double now, float dt);
 void DrawGame(Game* g);
 void CloseGame(Game* g);
 

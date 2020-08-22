@@ -11,7 +11,7 @@
 
 static Vector2 RectangleCenter(const Rectangle* rect);
 
-void InitGame(Game* g)
+void InitGame(Game* g, double now)
 {
   // Initialize player
   g->player.rect.x = g->screen.width / 2.0f;
@@ -22,7 +22,8 @@ void InitGame(Game* g)
   g->player.speed.y = 0;
   g->player.color = BLACK;
 
-  g->shootRate = 0;
+  g->lastShot = 0;
+  g->shootRate = 3;
 
   // Initialize bullets
   foreach(Entity* bullet, g->bullets)
@@ -47,7 +48,7 @@ void InitGame(Game* g)
     enemy->rect.x = (float) GetRandomValue(0, (int) g->screen.width);
     enemy->rect.y = (float) GetRandomValue((int) -g->screen.height, -20);
     enemy->max_speed.x = 0;
-    enemy->max_speed.y = 5.0f + 0.1f * (float) GetRandomValue(-10, 10);
+    enemy->max_speed.y = 300.0f + 6.0f * (float) GetRandomValue(-10, 10);
     enemy->speed.x = 0;
     enemy->speed.y = 0;
     enemy->active = true;
@@ -57,14 +58,14 @@ void InitGame(Game* g)
   TraceLog(LOG_INFO, "Game object size %lu bytes\n", sizeof(Game));
 }
 
-void UpdateGame(Game* g)
+void UpdateGame(Game* g, double now, float dt)
 {
   // Update player speed
-  g->player.speed.x = 5 * (IsKeyDown(KEY_RIGHT) - IsKeyDown(KEY_LEFT));
+  g->player.speed.x = 300.0f * (float) (IsKeyDown(KEY_RIGHT) - IsKeyDown(KEY_LEFT));
 
   // Update player position
-  g->player.rect.x += g->player.speed.x;
-  g->player.rect.y += g->player.speed.y;
+  g->player.rect.x += g->player.speed.x * dt;
+  g->player.rect.y += g->player.speed.y * dt;
 
   // Wall behavior
   if(g->player.rect.x <= 0)
@@ -77,20 +78,20 @@ void UpdateGame(Game* g)
   }
 
   // Fire bullets
-  if(IsKeyDown(KEY_SPACE))
+  if(IsKeyDown(KEY_SPACE) && (now - g->lastShot) > 1.0f / g->shootRate)
   {
-    g->shootRate += 5;
+    g->lastShot = now;
 
     foreach(Entity* bullet, g->bullets)
     {
-      if(!bullet->active && g->shootRate % 40 == 0)
+      if(!bullet->active)
       {
         const Vector2 player_center = RectangleCenter(&g->player.rect);
 
         bullet->rect.x = player_center.x - bullet->rect.width / 2;
         bullet->rect.y = g->player.rect.y;
         bullet->speed.x = g->player.speed.x / 4;
-        bullet->speed.y = -10;
+        bullet->speed.y = -600;
         bullet->active = true;
         break;
       }
@@ -102,14 +103,13 @@ void UpdateGame(Game* g)
   {
     if(bullet->active)
     {
-      bullet->rect.x += bullet->speed.x;
-      bullet->rect.y += bullet->speed.y;
+      bullet->rect.x += bullet->speed.x * dt;
+      bullet->rect.y += bullet->speed.y * dt;
 
       // Check if bullet has left the screen
       if(!CheckCollisionRecs(bullet->rect, g->screen))
       {
         bullet->active = false;
-        g->shootRate = 0;
       }
 
       // Check if bullet has collided with an enemy
@@ -125,7 +125,7 @@ void UpdateGame(Game* g)
             // Reset enemy position
             enemy->rect.x = (float) GetRandomValue(g->screen.width, g->screen.width + 1000);
             enemy->rect.y = (float) GetRandomValue(0, g->screen.height - enemy->rect.height);
-            g->shootRate = 0;
+            g->lastShot = 0;
           }
         }
       }
@@ -140,8 +140,8 @@ void UpdateGame(Game* g)
       enemy->speed.x = enemy->max_speed.x;
       enemy->speed.y = enemy->max_speed.y;
 
-      enemy->rect.x += enemy->speed.x;
-      enemy->rect.y += enemy->speed.y;
+      enemy->rect.x += enemy->speed.x * dt;
+      enemy->rect.y += enemy->speed.y * dt;
 
       if(!CheckCollisionRecs(enemy->rect, g->screen))
       {

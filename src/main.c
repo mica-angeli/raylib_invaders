@@ -13,13 +13,13 @@ int main() {
 
   InitWindow(g.screen.width, g.screen.height, "Raylib Invaders");
 
-  InitGame(&g);
+  InitGame(&g, GetTime());
 
-  SetTargetFPS(60);
+//  SetTargetFPS(60);
 
   while(!WindowShouldClose())
   {
-    UpdateGame(&g);
+    UpdateGame(&g, GetTime(), GetFrameTime());
     BeginDrawing();
     DrawGame(&g);
     EndDrawing();
