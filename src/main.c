@@ -3,11 +3,15 @@
 
 int main() {
   Game g = {
-      .screenWidth=800,
-      .screenHeight=450
+      .screen={
+          .x=0,
+          .y=0,
+          .width=800,
+          .height=450,
+          }
   };
 
-  InitWindow(g.screenWidth, g.screenHeight, "Raylib Invaders");
+  InitWindow(g.screen.width, g.screen.height, "Raylib Invaders");
 
   InitGame(&g);
 

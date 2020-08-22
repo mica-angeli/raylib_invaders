@@ -15,8 +15,8 @@ static Vector2 RectangleCenter(const Rectangle* rect);
 void InitGame(Game* g)
 {
   // Initialize player
-  g->player.rect.x = g->screenWidth / 2.0f;
-  g->player.rect.y = g->screenHeight - 20;
+  g->player.rect.x = g->screen.width / 2.0f;
+  g->player.rect.y = g->screen.height - 20;
   g->player.rect.width = 20;
   g->player.rect.height = 20;
   g->player.speed.x = 5;
@@ -58,9 +58,9 @@ void UpdateGame(Game* g)
   {
     g->player.rect.x = 0;
   }
-  if(g->player.rect.x + g->player.rect.width >= g->screenWidth)
+  if(g->player.rect.x + g->player.rect.width >= g->screen.width)
   {
-    g->player.rect.x = g->screenWidth - g->player.rect.width;
+    g->player.rect.x = g->screen.width - g->player.rect.width;
   }
 
   if(IsKeyDown(KEY_SPACE))

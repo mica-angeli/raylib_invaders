@@ -23,8 +23,7 @@ typedef struct Bullet
 
 typedef struct Game
 {
-  const int screenWidth;
-  const int screenHeight;
+  const Rectangle screen;
   int shootRate;
   Player player;
   Bullet bullets[MAX_BULLETS];
