@@ -4,6 +4,8 @@
 #include <raylib.h>
 #include "vector.h"
 
+#define MAX_BULLETS 16
+
 typedef struct Player
 {
   Rectangle rect;
@@ -25,7 +27,7 @@ typedef struct Game
   const int screenHeight;
   int shootRate;
   Player player;
-  vector bullets;
+  Bullet bullets[MAX_BULLETS];
 } Game;
 
 void InitGame(Game* g);

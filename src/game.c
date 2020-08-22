@@ -2,7 +2,15 @@
 #include <stdlib.h>
 #include "game.h"
 
-static void SpawnBullet(Game *g);
+#define foreach(item, array) \
+    for(int keep = 1, \
+            count = 0,\
+            size = sizeof (array) / sizeof *(array); \
+        keep && count != size; \
+        keep = !keep, count++) \
+      for(item = (array) + count; keep; keep = !keep)
+
+static Vector2 RectangleCenter(const Rectangle* rect);
 
 void InitGame(Game* g)
 {
@@ -17,9 +25,20 @@ void InitGame(Game* g)
 
   g->shootRate = 0;
 
-  vector_ctor(&g->bullets);
+  // Initialize bullets
+  foreach(Bullet* bullet, g->bullets)
+  {
+    bullet->rect.x = 0;
+    bullet->rect.y = 0;
+    bullet->rect.width = 5;
+    bullet->rect.height = 10;
+    bullet->speed.x = 0;
+    bullet->speed.y = -10;
+    bullet->active = false;
+    bullet->color = MAROON;
+  }
 
-  printf("Bullet size %d bytes", sizeof(Bullet));
+  printf("Game object size %d bytes\n", sizeof(Game));
 }
 
 void UpdateGame(Game* g)
@@ -47,18 +66,37 @@ void UpdateGame(Game* g)
   if(IsKeyDown(KEY_SPACE))
   {
     g->shootRate += 5;
-    SpawnBullet(g);
+
+    foreach(Bullet* bullet, g->bullets)
+    {
+      if(!bullet->active && g->shootRate % 40 == 0)
+      {
+        const Vector2 player_center = RectangleCenter(&g->player.rect);
+        const float buffer = 10;
+
+        bullet->rect.x = player_center.x - bullet->rect.width / 2;
+        bullet->rect.y = player_center.y - buffer - bullet->rect.height;
+        bullet->active = true;
+        break;
+      }
+    }
   }
 
   // Update Bullet positions
-  for(int i = 0; i < vector_size(&g->bullets); i++)
+  foreach(Bullet* bullet, g->bullets)
   {
-    Bullet* bullet = vector_at(&g->bullets, i);
-    bullet->rect.x += bullet->speed.x;
-    bullet->rect.y += bullet->speed.y;
+    if(bullet->active)
+    {
+      bullet->rect.x += bullet->speed.x;
+      bullet->rect.y += bullet->speed.y;
+
+      if(bullet->rect.y <= 0)
+      {
+        bullet->active = false;
+        g->shootRate = 0;
+      }
+    }
   }
-
-
 }
 
 void DrawGame(Game* g)
@@ -67,9 +105,8 @@ void DrawGame(Game* g)
 
   DrawRectangleRec(g->player.rect, g->player.color);
 
-  for(int i = 0; i < vector_size(&g->bullets); i++)
+  foreach(Bullet* bullet, g->bullets)
   {
-    Bullet* bullet = vector_at(&g->bullets, i);
     if(bullet->active)
     {
       DrawRectangleRec(bullet->rect, bullet->color);
@@ -79,19 +116,14 @@ void DrawGame(Game* g)
 
 void CloseGame(Game* g)
 {
-  vector_dtor(&g->bullets);
+
 }
 
-static void SpawnBullet(Game *g)
+static Vector2 RectangleCenter(const Rectangle* rect)
 {
-  Bullet* bullet = malloc(sizeof(Bullet));
-  bullet->rect.width = 5;
-  bullet->rect.height = 10;
-  bullet->rect.x = g->player.rect.x + g->player.rect.width / 2;
-  bullet->rect.y = g->player.rect.y + g->player.rect.height / 4;
-  bullet->speed.x = 0;
-  bullet->speed.y = -10;
-  bullet->active = true;
-  bullet->color = MAROON;
-  vector_push_back(&g->bullets, bullet);
+  const Vector2 center = {
+      .x = rect->x + rect->width / 2.0f,
+      .y = rect->y + rect->height / 2.0f
+  };
+  return center;
 }
