@@ -15,13 +15,13 @@ int main() {
 
   InitAudioDevice();
 
-  InitGame(&g, GetTime());
+  InitGame(&g);
 
 //  SetTargetFPS(60);
 
   while(!WindowShouldClose())
   {
-    UpdateGame(&g, GetTime(), GetFrameTime());
+    UpdateGame(&g, GetFrameTime());
     BeginDrawing();
     DrawGame(&g);
     EndDrawing();

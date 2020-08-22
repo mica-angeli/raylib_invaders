@@ -11,7 +11,7 @@
 
 static Vector2 RectangleCenter(const Rectangle* rect);
 
-void InitGame(Game* g, double now)
+void InitGame(Game* g)
 {
   // Initialize player
   Entity* player = &g->player;
@@ -26,7 +26,7 @@ void InitGame(Game* g, double now)
   player->active = true;
   player->color = BLACK;
 
-  g->lastShot = 0;
+  g->timeUntilNextShot = 0;
   g->shootRate = 3;
 
   // Initialize bullets
@@ -68,7 +68,7 @@ void InitGame(Game* g, double now)
   TraceLog(LOG_INFO, "Game object size %lu bytes\n", sizeof(Game));
 }
 
-void UpdateGame(Game* g, double now, float dt)
+void UpdateGame(Game* g, float dt)
 {
   // Update player speed
   g->player.speed.x = g->player.max_speed.x *
@@ -92,11 +92,12 @@ void UpdateGame(Game* g, double now, float dt)
   }
 
   // Fire bullets when space bar is pressed at a certain rate and player is still alive
+  g->timeUntilNextShot -= dt;
   if(IsKeyDown(KEY_SPACE) &&
-    (now - g->lastShot) > 1.0f / g->shootRate &&
+    g->timeUntilNextShot <= 0 &&
     g->player.active)
   {
-    g->lastShot = now;
+    g-> timeUntilNextShot = 1.0f / g->shootRate;
     PlaySound(g->sfxShoot);
 
     foreach(Entity* bullet, g->bullets)
@@ -143,7 +144,7 @@ void UpdateGame(Game* g, double now, float dt)
             // Reset enemy position
             enemy->rect.x = (float) GetRandomValue(g->screen.width, g->screen.width + 1000);
             enemy->rect.y = (float) GetRandomValue(0, g->screen.height - enemy->rect.height);
-            g->lastShot = 0;
+            g->timeUntilNextShot = 0;
           }
         }
       }

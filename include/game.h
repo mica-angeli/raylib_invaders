@@ -18,7 +18,7 @@ typedef struct Entity
 typedef struct Game
 {
   const Rectangle screen;
-  double lastShot;
+  float timeUntilNextShot;
   float shootRate;
   int activeEnemies;
   Entity player;
@@ -29,8 +29,8 @@ typedef struct Game
   Sound sfxPlayerExplode;
 } Game;
 
-void InitGame(Game* g, double now);
-void UpdateGame(Game* g, double now, float dt);
+void InitGame(Game* g);
+void UpdateGame(Game* g, float dt);
 void DrawGame(Game* g);
 void CloseGame(Game* g);
 
